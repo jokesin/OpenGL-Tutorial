@@ -67,8 +67,8 @@ package body GL_2_Draw_Commands is
             Aspect := Single( Width ) / Single ( Height );
          end;
 
-         Render_Program := Program_From((Src("shaders\vertex_shader.glsl", Vertex_Shader),
-                                        Src("shaders\fragment_shader.glsl", Fragment_Shader)));
+         Render_Program := Program_From((Src("shaders\gl_2_draw_commands\vertex_shader.glsl", Vertex_Shader),
+                                        Src("shaders\gl_2_draw_commands\fragment_shader.glsl", Fragment_Shader)));
          Use_Program(Render_Program);
          Render_Model_Matrix_Loc := Uniform_Location(Render_Program, "model_matrix");
          Render_Projection_Matrix_Loc := Uniform_Location(Render_Program, "projection_matrix");
