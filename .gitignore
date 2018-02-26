@@ -3,3 +3,22 @@
 
 # Ada Library Information
 *.ali
+
+# Executables
+*.exe
+*.dll
+
+# Database files
+gnatinspect*
+*.bexch
+
+# Temp compiler files
+GNAT-TEMP-*.TMP
+b__*.ad*
+gpsauto.cgpr
+*-loc.xml
+
+.#*#
+
+*.stderr
+*.stdout
