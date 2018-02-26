@@ -9,8 +9,11 @@ package Utilities is
 
    procedure Clear_Background_Colour (Colour : GL.Types.Colors.Color);
    
-   procedure Load_Index_Buffer is new
+   procedure Load_Element_Buffer is new
      GL.Objects.Buffers.Load_To_Buffer(GL.Types.UShorts.Vector3_Pointers);
+   
+   procedure Load_Element_Buffer is new
+     GL.Objects.Buffers.Load_To_Buffer(GL.Types.UShort_Pointers);
    
    procedure Load_Vertex_Buffer is new
      GL.Objects.Buffers.Load_To_Buffer(GL.Types.Singles.Vector4_Pointers);

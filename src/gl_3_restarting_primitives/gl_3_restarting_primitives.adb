@@ -6,6 +6,7 @@ with GL.Objects.Buffers;
 with GL.Objects.Programs;
 with GL.Objects.Shaders;
 with GL.Objects.Vertex_Arrays;
+with GL.Toggles;
 with GL.Types;
 with GL.Types.Colors;
 with GL.Uniforms;
@@ -23,7 +24,7 @@ with Interfaces.C;
 
 with GL;
 
-package body GL_2_Draw_Commands is
+package body GL_3_Restarting_Primitives is
 
    ---------------
    -- Main_Loop --
@@ -53,12 +54,16 @@ package body GL_2_Draw_Commands is
          use GL.Objects.Buffers;
          use GL.Objects.Programs;
          use GL.Objects.Shaders;
+         use GL.Toggles;
+
          use Program_Loader;
 
          use type Interfaces.C.int;
 
 
       begin
+
+         GL.Toggles.Enable(Cull_Face);
 
          declare
             Width, Height : Glfw.Size;
@@ -67,18 +72,17 @@ package body GL_2_Draw_Commands is
             Aspect := Single( Width ) / Single ( Height );
          end;
 
-         Render_Program := Program_From((Src("shaders\gl_2_draw_commands\vertex_shader.glsl", Vertex_Shader),
-                                        Src("shaders\gl_2_draw_commands\fragment_shader.glsl", Fragment_Shader)));
+         Render_Program := Program_From((Src("shaders\gl_3_restarting_primitives\vertex_shader.glsl", Vertex_Shader),
+                                        Src("shaders\gl_3_restarting_primitives\fragment_shader.glsl", Fragment_Shader)));
          Use_Program(Render_Program);
          Render_Model_Matrix_Loc := Uniform_Location(Render_Program, "model_matrix");
          Render_Projection_Matrix_Loc := Uniform_Location(Render_Program, "projection_matrix");
 
 
-
          declare
-            Block_Size    : Int :=Utilities.Get_Size(Vertex_Data.Vertex_Positions) +
-              Utilities.Get_Size(Vertex_Data.Vertex_Colors);
-            Colour_Offset : Int := Utilities.Get_Size(Vertex_Data.Vertex_Positions);
+            Block_Size    : Int :=Utilities.Get_Size(Vertex_Data.Cube_Positions) +
+              Utilities.Get_Size(Vertex_Data.Cube_Colors);
+            Colour_Offset : Int := Utilities.Get_Size(Vertex_Data.Cube_Positions);
          begin
 
             -- выделим имя для буфера вершин
@@ -88,15 +92,15 @@ package body GL_2_Draw_Commands is
             -- установим буфер индексов
             Index_Buffer.Initialize_Id;-- GenBuffers
             Element_Array_Buffer.Bind(Index_Buffer);--glBindBuffer(GL_ELEMENT_ARRAY_BUFFER...
-            Utilities.Load_Element_Buffer(Element_Array_Buffer, Vertex_Data.Vertex_Indices, Static_Draw);
+            Utilities.Load_Element_Buffer(Element_Array_Buffer, Vertex_Data.Cube_Indices, Static_Draw);
 
             -- установим атрибуты вершин
             Vertex_Buffer.Initialize_Id;-- GenBuffers
             Array_Buffer.Bind(Vertex_Buffer);--glBindBuffer(GL_ARRAY_BUFFER...
 
             GL.Objects.Buffers.Allocate(Array_Buffer, Long(Block_Size),Static_Draw);
-            Utilities.Set_Buffer_Sub_Data(Array_Buffer, 0, Vertex_Data.Vertex_Positions);
-            Utilities.Set_Buffer_Sub_Data(Array_Buffer, Colour_Offset, Vertex_Data.Vertex_Colors);
+            Utilities.Set_Buffer_Sub_Data(Array_Buffer, 0, Vertex_Data.Cube_Positions);
+            Utilities.Set_Buffer_Sub_Data(Array_Buffer, Colour_Offset, Vertex_Data.Cube_Colors);
 
 
             GL.Attributes.Set_Vertex_Attrib_Pointer_S(vPosition, 4, Single_Type, 0, 0);
@@ -117,9 +121,23 @@ package body GL_2_Draw_Commands is
       procedure Render is
          use GL.Objects.Buffers;
          use GL.Objects.Programs;
+         use GL.Toggles;
          use Glfw;
+         use Interfaces.C;
+         use type Singles.Matrix4;
 
-         Model_Matrix : Singles.Matrix4 := GL.Types.Singles.Identity4;
+         T : Seconds := Time / 20.0;-- mod 5000) / 5000.0;
+         oX : Singles.Vector3 := (1.0, 0.0, 0.0);
+         oY : Singles.Vector3 := (0.0, 1.0, 0.0);
+         oZ : Singles.Vector3 := (0.0, 0.0, 1.0);
+
+
+         Model_Matrix : Singles.Matrix4 :=
+           Maths.Translation_Matrix((0.0, 0.0, -5.0)) *
+             Maths.Rotation_Matrix(Maths.Degree(T * 360.0), oY) *
+               Maths.Rotation_Matrix(Maths.Degree(T * 720.0), oZ);
+
+
          Proj_Matrix  : Singles.Matrix4 := Maths.Perspective_Matrix(Top    => 1.0,
                                                                     Bottom => -1.0,
                                                                     Left   => -Aspect,
@@ -129,35 +147,29 @@ package body GL_2_Draw_Commands is
          Black : Colors.Color := (0.0,0.0,0.0,1.0);
 
       begin
+
+         --Put_Line("Seconds : " & T'Img);
+
          Utilities.Clear_Background_Colour(Black);
          Use_Program(Render_Program);
 
          -- установим матрицы модели и проекции
+         GL.Uniforms.Set_Single(Render_Model_Matrix_Loc, Model_Matrix);
          GL.Uniforms.Set_Single(Render_Projection_Matrix_Loc, Proj_Matrix);
 
          -- установки для вызова glDrawElements
          Vertex_Array_Object.Bind;
          Element_Array_Buffer.Bind(Index_Buffer);
 
-         -- DrawArrays...
-         Model_Matrix := Maths.Translation_Matrix((-3.0, 0.0, -5.0));
-         GL.Uniforms.Set_Single(Render_Model_Matrix_Loc, Model_Matrix);
-         GL.Objects.Vertex_Arrays.Draw_Arrays(Triangles, 0, 3);
+         -- рисуем с индексом рестарта
+         -- вызываем только одну команду рисования
+         GL.Toggles.Enable(Primitive_Restart);
+         Primitive_Restart_Index(16#FFFF#);
+         GL.Objects.Buffers.Draw_Elements(Triangle_Strip, 17, UShort_Type, 0);
 
-         -- DrawElements...
-         Model_Matrix := Maths.Translation_Matrix((-1.0, 0.0, -5.0));
-         GL.Uniforms.Set_Single(Render_Model_Matrix_Loc, Model_Matrix);
-         GL.Objects.Buffers.Draw_Elements(Triangles, 3, UShort_Type, 0);
-
-         -- glDrawElementsBaseVertex...
-         Model_Matrix := Maths.Translation_Matrix((1.0, 0.0, -5.0));
-         GL.Uniforms.Set_Single(Render_Model_Matrix_Loc, Model_Matrix);
-         GL.Objects.Buffers.Draw_Elements_Base_Vertex(Triangles, 3, UShort_Type, 0, 1);
-
-         -- glDrawArraysInstanced
-         Model_Matrix := Maths.Translation_Matrix((3.0, 0.0, -5.0));
-         GL.Uniforms.Set_Single(Render_Model_Matrix_Loc, Model_Matrix);
-         GL.Objects.Buffers.Draw_Arrays_Instanced(Triangles, 0, 3, 1);
+         -- без рестарта надо уже 2 (куб из двух полос друг в друга)
+         --GL.Objects.Buffers.Draw_Elements(Triangle_Strip, 8, UShort_Type, 0);
+         --GL.Objects.Buffers.Draw_Elements(Triangle_Strip, 8, UShort_Type, 9);
       exception
          when  others =>
             Put_Line ("An exceptiom occurred in Render.");
@@ -186,4 +198,4 @@ package body GL_2_Draw_Commands is
          raise;
    end Main_Loop;
 
-end GL_2_Draw_Commands;
+end GL_3_Restarting_Primitives;
