@@ -99,8 +99,8 @@ package body GL_2_Draw_Commands is
             Utilities.Set_Buffer_Sub_Data(Array_Buffer, Colour_Offset, Vertex_Data.Vertex_Colors);
 
 
-            GL.Attributes.Set_Vertex_Attrib_Pointer_S(vPosition, 4, Single_Type, 0, 0);
-            GL.Attributes.Set_Vertex_Attrib_Pointer_S(vColour, 4, Single_Type, 0, Colour_Offset);
+            GL.Attributes.Set_Vertex_Attrib_Pointer2(vPosition, 4, Single_Type, 0, 0);
+            GL.Attributes.Set_Vertex_Attrib_Pointer2(vColour, 4, Single_Type, 0, Colour_Offset);
 
             GL.Attributes.Enable_Vertex_Attrib_Array(vPosition);
             GL.Attributes.Enable_Vertex_Attrib_Array(vColour);
