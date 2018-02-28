@@ -9,6 +9,7 @@ with GL_1_Simple_Draw;
 with GL_2_Draw_Commands;
 with GL_3_Restarting_Primitives;
 with GL_3_Instanced_Rendering;
+with GL_3_Instanced_Rendering_2;
 
 procedure OGL_Main is
    Main_Window : Glfw.Windows.Window;
@@ -21,7 +22,8 @@ begin
    --GL_1_Simple_Draw.Main_Loop(Main_Window);
    --GL_2_Draw_Commands.Main_Loop(Main_Window);
    --GL_3_Restarting_Primitives.Main_Loop(Main_Window);
-   GL_3_Instanced_Rendering.Main_Loop(Main_Window);
+   --GL_3_Instanced_Rendering.Main_Loop(Main_Window);
+   GL_3_Instanced_Rendering_2.Main_Loop(Main_Window);
 
    Glfw.Shutdown;
 
