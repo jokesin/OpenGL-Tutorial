@@ -26,4 +26,4 @@ gpsauto.cgpr
 *.txt
 *.ini
 
-./bin/debug/Images/*
+bin/debug/Images/*
