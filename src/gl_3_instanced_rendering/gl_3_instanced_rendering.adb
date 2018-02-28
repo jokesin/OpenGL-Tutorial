@@ -267,13 +267,13 @@ package body GL_3_Instanced_Rendering is
       procedure Set_Model_Matrix_Mapped with Inline is
          use GL;
          use GL.Types;
-         Model_Matrix_Pointer : Singles.Matrix4_Pointers.Pointer;
+         Model_Matrices_Pointer : Singles.Matrix4_Pointers.Pointer;
 
       begin
          Array_Buffer.Bind(Matrix_Buffer);
-         Utilities.Map(Array_Buffer, Write_Only, Model_Matrix_Pointer);
+         Utilities.Map(Array_Buffer, Write_Only, Model_Matrices_Pointer);
          declare
-            Model_Matrices : aliased Singles.Matrix4_Array:= Singles.Matrix4_Pointers.Value(Model_Matrix_Pointer, INSTANCE_COUNT);
+            Model_Matrices : aliased Singles.Matrix4_Array:= Singles.Matrix4_Pointers.Value(Model_Matrices_Pointer, INSTANCE_COUNT);
          begin
             for K in 1..GL.Types.Int(INSTANCE_COUNT) loop
                A := 5.0 * Single(K) / 4.0;
@@ -285,12 +285,45 @@ package body GL_3_Instanced_Rendering is
                  Maths.Translation_Matrix((2.0 + A, 2.0 + B, -1.0 + C));
             end loop;
             Singles.Matrix4_Pointers.Copy_Array(Source => Model_Matrices(Model_Matrices'First)'Unchecked_Access,
-                                                Target => Model_Matrix_Pointer,
+                                                Target => Model_Matrices_Pointer,
                                                 Length => INSTANCE_COUNT);
          end;
 
          GL.Objects.Buffers.Unmap(Array_Buffer);
       end Set_Model_Matrix_Mapped;
+
+      ---------------------------------------------------------------
+
+      procedure Set_Model_Matrix_Mapped_Direct with Inline is
+         use GL;
+         use GL.Types;
+
+         subtype Model_Matrix_Array is Singles.Matrix4_Array(1..INSTANCE_COUNT);
+         type Model_Matrices_Access is access all Model_Matrix_Array;
+         Model_Matrices : Model_Matrices_Access;
+
+         Model_Matrices_Pointer : Singles.Matrix4_Pointers.Pointer;
+
+         function To_Array_Access is new Ada.Unchecked_Conversion(Singles.Matrix4_Pointers.Pointer,
+                                                                  Model_Matrices_Access);
+      begin
+         Array_Buffer.Bind(Matrix_Buffer);
+         Utilities.Map(Array_Buffer, Write_Only, Model_Matrices_Pointer);
+
+         Model_Matrices := To_Array_Access(Model_Matrices_Pointer);
+
+         for K in Model_Matrices'Range loop
+            A := 5.0 * Single(K) / 4.0;
+            B := 5.0 * Single(K) / 5.0;
+            C := 5.0 * Single(K) / 6.0;
+            Model_Matrices(K) := Maths.Rotation_Matrix(Maths.Degree(A + Single(T) * 360.0), oX) *
+              Maths.Rotation_Matrix(Maths.Degree(B + Single(T) * 360.0), oY) *
+              Maths.Rotation_Matrix(Maths.Degree(C + Single(T) * 360.0), oZ) *
+              Maths.Translation_Matrix((2.0 + A, 2.0 + B, -1.0 + C));
+         end loop;
+
+         GL.Objects.Buffers.Unmap(Array_Buffer);
+      end Set_Model_Matrix_Mapped_Direct;
 
       ---------------------------------------------------------------
 
@@ -302,7 +335,8 @@ package body GL_3_Instanced_Rendering is
 
       -- установить матрицу модели
       --Set_Model_Matrix_Sub_Data;
-      Set_Model_Matrix_Mapped;
+      --Set_Model_Matrix_Mapped;
+      Set_Model_Matrix_Mapped_Direct;
 
       -- запускаем программу
       Use_Program(Render_Program);
