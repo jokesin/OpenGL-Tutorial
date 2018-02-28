@@ -69,7 +69,7 @@ package body GL_1_Simple_Draw is
 
       Vertex_Buffer.Initialize_Id;
       Array_Buffer.Bind(Vertex_Buffer);
-      Utilities.Load_Vertex_Buffer(Array_Buffer, Vertex_Data.Vertices, Static_Draw);
+      Utilities.Load_Vertex_Buffer_2(Array_Buffer, Vertex_Data.Vertices, Static_Draw);
 
       Render_Program := Program_From((Src("shaders\gl_1_simple_draw\vertex_shader.glsl", Vertex_Shader),
                                      Src("shaders\gl_1_simple_draw\fragment_shader.glsl", Fragment_Shader)));

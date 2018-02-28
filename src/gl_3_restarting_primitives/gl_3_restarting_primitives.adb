@@ -26,31 +26,56 @@ with GL;
 
 package body GL_3_Restarting_Primitives is
 
+   use GL.Types;
+
+   Vertex_Array_Object          : GL.Objects.Vertex_Arrays.Vertex_Array_Object;
+
+   Index_Buffer                 : GL.Objects.Buffers.Buffer;
+   Vertex_Buffer                : GL.Objects.Buffers.Buffer;
+
+   Render_Program               : GL.Objects.Programs.Program;
+
+   vPosition                    : constant GL.Attributes.Attribute := 0;
+   vColour                      : constant GL.Attributes.Attribute := 1;
+
+   Render_Model_Matrix_Loc      : GL.Uniforms.Uniform;
+   Render_Projection_Matrix_Loc : GL.Uniforms.Uniform;
+
+   Aspect                       : Single;
+
+   procedure Setup(Main_Window : in out Glfw.Windows.Window);
+   procedure Render;
+
+
    ---------------
    -- Main_Loop --
    ---------------
 
    procedure Main_Loop (Main_Window : in out Glfw.Windows.Window) is
 
-      use GL.Types;
+      use type Glfw.Input.Button_State;
 
-      Vertex_Array_Object          : GL.Objects.Vertex_Arrays.Vertex_Array_Object;
+      Running : Boolean := True;
+   begin
+      Setup(Main_Window);
+      while Running loop
+         Render;
 
-      Index_Buffer                 : GL.Objects.Buffers.Buffer;
-      Vertex_Buffer                : GL.Objects.Buffers.Buffer;
+         Glfw.Windows.Context.Swap_Buffers(Main_Window'Access);
+         Glfw.Input.Poll_Events;
+         Running := Running and not
+           (Main_Window.Key_State(Glfw.Input.Keys.Escape) = Glfw.Input.Pressed);
+         Running := Running and not Main_Window.Should_Close;
+      end loop;
 
-      Render_Program               : GL.Objects.Programs.Program;
+   exception
+      when others =>
+         Put_Line("An exception occured in Main_Loop");
+         raise;
+   end Main_Loop;
 
-      vPosition                    : constant GL.Attributes.Attribute := 0;
-      vColour                      : constant GL.Attributes.Attribute := 1;
 
-      Render_Model_Matrix_Loc      : GL.Uniforms.Uniform;
-      Render_Projection_Matrix_Loc : GL.Uniforms.Uniform;
-
-      Aspect :Single;
-      --------------------------------------------------------------
-
-      procedure Setup is
+   procedure Setup(Main_Window : in out Glfw.Windows.Window) is
          use GL.Objects.Buffers;
          use GL.Objects.Programs;
          use GL.Objects.Shaders;
@@ -114,11 +139,9 @@ package body GL_3_Restarting_Primitives is
          when others =>
             Put_Line("An exception occured in Setup.");
             raise;
-      end Setup;
+   end Setup;
 
-      ---------------------------------------------------------------
-
-      procedure Render is
+   procedure Render is
          use GL.Objects.Buffers;
          use GL.Objects.Programs;
          use GL.Toggles;
@@ -175,27 +198,4 @@ package body GL_3_Restarting_Primitives is
             Put_Line ("An exceptiom occurred in Render.");
             raise;
       end Render;
-
-      -------------------------------------------------------------
-      use type Glfw.Input.Button_State;
-
-      Running : Boolean := True;
-   begin
-      Setup;
-      while Running loop
-         Render;
-
-         Glfw.Windows.Context.Swap_Buffers(Main_Window'Access);
-         Glfw.Input.Poll_Events;
-         Running := Running and not
-           (Main_Window.Key_State(Glfw.Input.Keys.Escape) = Glfw.Input.Pressed);
-         Running := Running and not Main_Window.Should_Close;
-      end loop;
-
-   exception
-      when others =>
-         Put_Line("An exception occured in Main_Loop");
-         raise;
-   end Main_Loop;
-
 end GL_3_Restarting_Primitives;

@@ -22,3 +22,6 @@ gpsauto.cgpr
 
 *.stderr
 *.stdout
+
+*.txt
+*.ini
