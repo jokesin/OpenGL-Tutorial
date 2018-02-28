@@ -51,7 +51,8 @@ package body GL_3_Instanced_Rendering is
 
    Aspect                       : Single;
 
-   INSTANCE_COUNT : constant := 50;
+   INSTANCE_COUNT : constant := 5000;
+
 
    procedure Setup(Main_Window : in out Glfw.Windows.Window);
    procedure Render;
@@ -61,14 +62,34 @@ package body GL_3_Instanced_Rendering is
    ---------------
 
    procedure Main_Loop (Main_Window : in out Glfw.Windows.Window) is
-
+      use Glfw;
       use type Glfw.Input.Button_State;
+
+      Is_Checking_Frame_Time           : Boolean := False;
+      Start_Time, End_Time, Check_Time : Uint;
+      Frames                           : UInt := 0;
 
       Running : Boolean := True;
    begin
       Setup(Main_Window);
       while Running loop
+
+         if not Is_Checking_Frame_Time then
+            Start_Time := Uint(Time);
+            Is_Checking_Frame_Time := True;
+         end if;
+
          Render;
+
+         End_Time := Uint(Time);
+         Check_Time := End_Time - Start_Time;
+         if (Check_Time < 1) then
+            Frames := Frames + 1;
+         else
+            Put_Line("Frames per second : " & Frames'Img);
+            Frames := 0;
+            Is_Checking_Frame_Time := False;
+         end if;
 
          Glfw.Windows.Context.Swap_Buffers(Main_Window'Access);
          Glfw.Input.Poll_Events;
@@ -220,6 +241,7 @@ package body GL_3_Instanced_Rendering is
       use type GL.Attributes.Attribute;
 
       T     : Seconds := Time / 20.0;-- mod 5000) / 5000.0;
+
       A,B,C : Single;
       oX    : Singles.Vector3 := (1.0, 0.0, 0.0);
       oY    : Singles.Vector3 := (0.0, 1.0, 0.0);
@@ -235,7 +257,7 @@ package body GL_3_Instanced_Rendering is
                                                                  Left   => -Aspect,
                                                                  Right  => Aspect,
                                                                  Near   => 1.0,
-                                                                 Far    => 1000.0);
+                                                                 Far    => 1500.0);
 
 
       Black        : Colors.Color := (0.0,0.0,0.0,1.0);
@@ -327,9 +349,9 @@ package body GL_3_Instanced_Rendering is
 
       ---------------------------------------------------------------
 
-   begin
 
-      --Put_Line("Seconds : " & T'Img);
+
+   begin
 
       Utilities.Clear_Background_Colour(Black);
 
@@ -359,6 +381,8 @@ package body GL_3_Instanced_Rendering is
       -- без рестарта надо уже 2 (куб из двух полос друг в друга)
       --GL.Objects.Buffers.Draw_Elements_Instanced(Triangle_Strip, 8, UShort_Type, 0, 1);
       --GL.Objects.Buffers.Draw_Elements_Instanced(Triangle_Strip, 8, UShort_Type, 9, 1);
+
+
    exception
       when  others =>
          Put_Line ("An exceptiom occurred in Render.");
