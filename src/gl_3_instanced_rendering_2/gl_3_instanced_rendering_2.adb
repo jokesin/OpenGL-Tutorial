@@ -111,6 +111,8 @@ package body GL_3_Instanced_Rendering_2 is
       Index_Buffer.Clear;
       Color_Buffer.Clear;
       Model_Matrix_Buffer.Clear;
+      Color_TBO.Clear;
+      Model_Matrix_TBO.Clear;
       Vertex_Array_Object.Clear;
    exception
       when others =>
@@ -237,6 +239,7 @@ package body GL_3_Instanced_Rendering_2 is
                                      INSTANCE_COUNT * Singles.Matrix4'Size / System.Storage_Unit,
                                      Dynamic_Draw);
          Texture_Buffer.Tex_Buffer(GL.Pixels.RGBA32F, Model_Matrix_Buffer);
+
          GL.Objects.Textures.Set_Active_Unit(0);
          --System.Machine_Code.Asm("int $3");
       end;

@@ -51,7 +51,7 @@ package body GL_3_Instanced_Rendering is
 
    Aspect                       : Single;
 
-   INSTANCE_COUNT : constant := 5000;
+   INSTANCE_COUNT : constant := 20000;
 
 
    procedure Setup(Main_Window : in out Glfw.Windows.Window);
