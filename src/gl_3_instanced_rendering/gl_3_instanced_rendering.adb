@@ -86,7 +86,7 @@ package body GL_3_Instanced_Rendering is
          if (Check_Time < 1) then
             Frames := Frames + 1;
          else
-            Put_Line("Frames per second : " & Frames'Img);
+            Put("Frames per second : " & Frames'Img & ASCII.CR);
             Frames := 0;
             Is_Checking_Frame_Time := False;
          end if;
