@@ -51,7 +51,7 @@ project OpenGL_Tutorial is
                            case Windowing_System is
 
                               when "windows" =>
-                                 for Main use ("gl_1.adb", "gl_2.adb", "gl_3_1.adb", "gl_3_2.adb", "gl_3_3.adb", "gl_4.adb");
+                                 for Main use ("gl_1.adb", "gl_2.adb", "gl_3_1.adb", "gl_3_2.adb", "gl_3_3.adb", "gl_4_1.adb", "gl_4_2.adb");
                                  for Source_Dirs use ("src/**");
                                  for Exec_Dir use "bin";
 
