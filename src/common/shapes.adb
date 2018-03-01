@@ -33,11 +33,14 @@ package body Shapes is
          Shape_Vertices(Shape_Vertices'Last)  := (0.0, -Radius, 0.0, 1.0);
 
          -- рассчитаем значения X,Y и Z, выставим W ( сверху вниз )
+         -- прим. : если не умножать значения X и Z дополнительно на синусы, то получается труба (цилиндр)
          for K in 1..Shape_Vertices'Length - 2 loop
-            Shape_Vertices(I)(X) := -Radius * Cos(Single(H_Angle_Start + Radian((K - 1)) * H_Angle_Step));
-            Shape_Vertices(I)(Y) := Radius * Cos(Single(V_Angle_Start + Radian(J) * V_Angle_Step));
-            Shape_Vertices(I)(Z) := Radius * Sin(Single(H_Angle_Start + Radian((K - 1)) * H_Angle_Step));
-            Shape_Vertices(I)(W) := 1.0;
+            Shape_Vertices(I)(X) := -Radius * Cos(Single(H_Angle_Start + Radian((K - 1)) * H_Angle_Step)) *
+              Sin(Single(V_Angle_Start + Radian(J) * V_Angle_Step));
+            Shape_Vertices(I)(Y) :=  Radius * Cos(Single(V_Angle_Start + Radian(J) * V_Angle_Step));
+            Shape_Vertices(I)(Z) :=  Radius * Sin(Single(H_Angle_Start + Radian((K - 1)) * H_Angle_Step)) *
+              Sin(Single(V_Angle_Start + Radian(J) * V_Angle_Step));
+            Shape_Vertices(I)(W) :=  1.0;
             I := I+1;
 
             -- сделаем шаг для вычисления значений Y

@@ -206,17 +206,29 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
 
       A,B,C : Single;
 
-      Sphere      : Polyhedron := Shapes.Init(3.0, 80, 60);
-      Vertices     : Shape_Vertex_Array := Sphere.Get_Vertices;
-      Normals      : Shape_Normal_Array := Sphere.Get_Normals;
-      Indices      : Shape_Indices_Array := Sphere.Get_Indices;
-      Colors       : Singles.Vector4_Array(Vertices'Range) := (others => (others => 0.0));
-      Color_Offset : Int := Utilities.Get_Size(Vertices);
+      Sphere        : Polyhedron := Shapes.Init(3.0, 200, 200);
+      Vertices      : Shape_Vertex_Array := Sphere.Get_Vertices;
+      Normals       : Shape_Normal_Array := Sphere.Get_Normals;
+      Indices       : Shape_Indices_Array := Sphere.Get_Indices;
+      Colors        : Singles.Vector4_Array(Vertices'Range) := (others => (others => 0.0));
+      Color_Offset  : Int := Utilities.Get_Size(Vertices);
       Normal_Offset : Int := Color_Offset + Utilities.Get_Size(Colors);
-      Block_Size   : Long := Long(Utilities.Get_Size(Vertices) +
+      Block_Size    : Long := Long(Utilities.Get_Size(Vertices) +
                                     Utilities.Get_Size(Colors) +
-                                    Utilities.Get_Size(Normals));
+                                     Utilities.Get_Size(Normals));
+
+      procedure Mode_Lines_Only(Mode_On : Boolean) is
+      begin
+         if Mode_On then
+            GL.Rasterization.Set_Polygon_Mode(GL.Rasterization.Line);
+         else
+            GL.Toggles.Enable(GL.Toggles.Cull_Face);
+         end if;
+      end Mode_Lines_Only;
+
    begin
+
+      Mode_Lines_Only(False);
 
       Render_Index_Count := Indices'Length;
 
@@ -227,8 +239,7 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
          Aspect := Single( Width ) / Single ( Height );
       end;
 
-      --GL.Toggles.Enable(GL.Toggles.Cull_Face);
-      GL.Rasterization.Set_Polygon_Mode(GL.Rasterization.Line);
+
 
       Render_Program := Program_From((Src("shaders\gl_4_stencil_test\vertex_shader.glsl", Vertex_Shader),
                                      Src("shaders\gl_4_stencil_test\fragment_shader.glsl", Fragment_Shader)));
