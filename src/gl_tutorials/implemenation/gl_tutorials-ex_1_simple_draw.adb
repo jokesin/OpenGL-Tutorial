@@ -16,7 +16,7 @@ with Glfw.Windows.Context;
 with Program_Loader;
 with Utilities;
 
-package body GL_1_Simple_Draw is
+package body GL_Tutorials.Ex_1_Simple_Draw is
 
    ---------------
    -- Main_Loop --
@@ -101,4 +101,4 @@ exception
       raise;
 end Main_Loop;
 
-end GL_1_Simple_Draw;
+end GL_Tutorials.Ex_1_Simple_Draw;

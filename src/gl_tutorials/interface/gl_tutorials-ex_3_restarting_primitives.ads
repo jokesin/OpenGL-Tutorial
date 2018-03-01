@@ -1,9 +1,6 @@
-with GL.Types;
-with Glfw.Windows;
+package GL_Tutorials.Ex_3_Restarting_Primitives is
 
-package GL_3_Instanced_Rendering_2 is
-
-  procedure Main_Loop(Main_Window : in out Glfw.Windows.Window);
+   procedure Main_Loop(Main_Window : in out Glfw.Windows.Window);
    
 private
 
@@ -20,16 +17,16 @@ private
                                                           ( 1.0,  1.0,  1.0, 1.0)
                                                          );
    
-      Cube_Normals : constant Singles.Vector3_Array := (
-                                                        (-1.0, -1.0, -1.0),
-                                                        (-1.0, -1.0,  1.0),
-                                                        (-1.0,  1.0, -1.0),
-                                                        (-1.0,  1.0,  1.0),
-                                                        ( 1.0, -1.0, -1.0),
-                                                        ( 1.0, -1.0,  1.0),
-                                                        ( 1.0,  1.0, -1.0),
-                                                        ( 1.0,  1.0,  1.0)
-                                                       );      
+      Cube_Colors : constant Singles.Vector4_Array := (
+                                                       (1.0, 1.0, 1.0, 1.0),
+                                                       (1.0, 1.0, 0.0, 1.0),
+                                                       (1.0, 0.0, 1.0, 1.0),
+                                                       (1.0, 0.0, 0.0, 1.0),
+                                                       (0.0, 1.0, 1.0, 1.0),
+                                                       (0.0, 1.0, 0.0, 1.0),
+                                                       (0.0, 0.0, 1.0, 1.0),
+                                                       (0.5, 0.5, 0.5, 1.0)
+                                                      );
    
       Cube_Indices : constant UShort_Array := ( 
                                                 0, 1, 2, 3, 6, 7, 4, 5, -- Первая полоса
@@ -37,6 +34,7 @@ private
                                                 2, 6, 0, 4, 1, 5, 3, 7 -- Вторая полоса
                                                );
    end Vertex_Data;
-    
+   
+                                              
 
-end GL_3_Instanced_Rendering_2;
+end GL_Tutorials.Ex_3_Restarting_Primitives;

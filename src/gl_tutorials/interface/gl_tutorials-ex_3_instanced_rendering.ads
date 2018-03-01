@@ -1,7 +1,4 @@
-with GL.Types;
-with Glfw.Windows;
-
-package GL_3_Instanced_Rendering is
+package GL_Tutorials.Ex_3_Instanced_Rendering is
 
   procedure Main_Loop(Main_Window : in out Glfw.Windows.Window);
    
@@ -39,4 +36,4 @@ private
    end Vertex_Data;
     
 
-end GL_3_Instanced_Rendering;
+end GL_Tutorials.Ex_3_Instanced_Rendering;

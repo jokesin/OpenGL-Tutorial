@@ -5,7 +5,7 @@ with Glfw;
 with Glfw.Windows;
 
 with Initialize;
-with GL_2_Draw_Commands;
+with GL_Tutorials.Ex_2_Draw_Commands;
 
 procedure GL_2 is
 Main_Window : Glfw.Windows.Window;
@@ -16,7 +16,7 @@ begin
    Glfw.Init;
    Initialize(Main_Window, Window_Title);
    
-   GL_2_Draw_Commands.Main_Loop(Main_Window);
+   GL_Tutorials.Ex_2_Draw_Commands.Main_Loop(Main_Window);
 
    Glfw.Shutdown;
 

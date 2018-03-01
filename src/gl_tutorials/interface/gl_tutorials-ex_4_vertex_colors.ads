@@ -1,10 +1,7 @@
 with GL.Objects.Buffers;
-with GL.Types;
-
-with Glfw.Windows;
 with Interfaces.C.Pointers;
 
-package GL_4_Vertex_Colors is
+package GL_Tutorials.Ex_4_Vertex_Colors is
 
    procedure Main_Loop(Main_Window : in out Glfw.Windows.Window);
    
@@ -41,4 +38,4 @@ private
    end Vertex_Data;
    
 
-end GL_4_Vertex_Colors;
+end GL_Tutorials.Ex_4_Vertex_Colors;

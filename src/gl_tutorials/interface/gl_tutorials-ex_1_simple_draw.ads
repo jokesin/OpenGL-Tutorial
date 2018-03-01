@@ -1,8 +1,4 @@
-with GL.Types;
-
-with Glfw.Windows;
-
-package GL_1_Simple_Draw is
+package GL_Tutorials.Ex_1_Simple_Draw is
 
    procedure Main_Loop(Main_Window : in out Glfw.Windows.Window);
    
@@ -22,4 +18,4 @@ private
    end Vertex_Data;
    
 
-end GL_1_Simple_Draw;
+end GL_Tutorials.Ex_1_Simple_Draw;

@@ -31,7 +31,7 @@ with GL;
 
 with System.Machine_Code;
 
-package body GL_3_Instanced_Rendering_2 is
+package body GL_Tutorials.Ex_3_Instanced_Rendering_2 is
 
    use GL.Types;
 
@@ -374,4 +374,4 @@ package body GL_3_Instanced_Rendering_2 is
    end Render;
 
 
-end GL_3_Instanced_Rendering_2;
+end GL_Tutorials.Ex_3_Instanced_Rendering_2;

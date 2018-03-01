@@ -5,7 +5,7 @@ with Glfw;
 with Glfw.Windows;
 
 with Initialize;
-with GL_3_Instanced_Rendering_2;
+with GL_Tutorials.Ex_3_Instanced_Rendering_2;
 
 procedure GL_3_3 is
 Main_Window : Glfw.Windows.Window;
@@ -16,7 +16,7 @@ begin
    Glfw.Init;
    Initialize(Main_Window, Window_Title);
    
-   GL_3_Instanced_Rendering_2.Main_Loop(Main_Window);
+   GL_Tutorials.Ex_3_Instanced_Rendering_2.Main_Loop(Main_Window);
 
    Glfw.Shutdown;
 

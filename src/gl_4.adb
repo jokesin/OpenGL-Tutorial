@@ -5,7 +5,7 @@ with Glfw;
 with Glfw.Windows;
 
 with Initialize;
-with GL_4_Vertex_Colors;
+with GL_Tutorials.Ex_4_Vertex_Colors;
 
 procedure GL_4 is
 Main_Window : Glfw.Windows.Window;
@@ -16,7 +16,7 @@ begin
    Glfw.Init;
    Initialize(Main_Window, Window_Title);
    
-   GL_4_Vertex_Colors.Main_Loop(Main_Window);
+   GL_Tutorials.Ex_4_Vertex_Colors.Main_Loop(Main_Window);
 
    Glfw.Shutdown;
 

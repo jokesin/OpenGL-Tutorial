@@ -23,7 +23,7 @@ with Interfaces.C;
 
 with GL;
 
-package body GL_2_Draw_Commands is
+package body GL_Tutorials.Ex_2_Draw_Commands is
 
    ---------------
    -- Main_Loop --
@@ -186,4 +186,4 @@ package body GL_2_Draw_Commands is
          raise;
    end Main_Loop;
 
-end GL_2_Draw_Commands;
+end GL_Tutorials.Ex_2_Draw_Commands;

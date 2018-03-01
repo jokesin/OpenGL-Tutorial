@@ -1,8 +1,4 @@
-with GL.Types;
-
-with Glfw.Windows;
-
-package GL_2_Draw_Commands is
+package GL_Tutorials.Ex_2_Draw_Commands is
 
    procedure Main_Loop(Main_Window : in out Glfw.Windows.Window);
 
@@ -35,4 +31,4 @@ private
 
    end Vertex_Data;
    
-end GL_2_Draw_Commands;
+end GL_Tutorials.Ex_2_Draw_Commands;

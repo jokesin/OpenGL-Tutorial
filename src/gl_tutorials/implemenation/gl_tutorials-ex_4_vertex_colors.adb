@@ -18,7 +18,7 @@ with System;
 with Program_Loader;
 with Utilities;
 
-package body GL_4_Vertex_Colors is
+package body GL_Tutorials.Ex_4_Vertex_Colors is
 
    ---------------
    -- Main_Loop --
@@ -116,4 +116,4 @@ package body GL_4_Vertex_Colors is
          raise;
    end Main_Loop;
 
-end GL_4_Vertex_Colors;
+end GL_Tutorials.Ex_4_Vertex_Colors;

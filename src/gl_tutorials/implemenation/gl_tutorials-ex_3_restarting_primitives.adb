@@ -24,7 +24,7 @@ with Interfaces.C;
 
 with GL;
 
-package body GL_3_Restarting_Primitives is
+package body GL_Tutorials.Ex_3_Restarting_Primitives is
 
    use GL.Types;
 
@@ -198,4 +198,4 @@ package body GL_3_Restarting_Primitives is
             Put_Line ("An exceptiom occurred in Render.");
             raise;
       end Render;
-end GL_3_Restarting_Primitives;
+end GL_Tutorials.Ex_3_Restarting_Primitives;
