@@ -51,7 +51,7 @@ project OpenGL_Tutorial is
                            case Windowing_System is
 
                               when "windows" =>
-                                 for Main use ("ogl_main.adb");
+                                 for Main use ("gl_1.adb", "gl_2.adb", "gl_3_1.adb", "gl_3_2.adb", "gl_3_3.adb", "gl_4.adb");
                                  for Source_Dirs use ("src/**");
                                  for Exec_Dir use "bin";
 
@@ -124,6 +124,51 @@ project OpenGL_Tutorial is
             end case;
       end case;
    end Compiler;
+
+   package Ide is
+
+      case Glfw_Version is
+
+         when "2" =>
+
+         when "3" =>
+
+            case Library_Type is
+
+               when "static" =>
+
+                  case Auto_Exceptions is
+
+                     when "enabled" =>
+
+                        case Mode is
+
+                           when "debug" =>
+
+                              case Windowing_System is
+
+                                 when "windows" =>
+                                    for Vcs_Kind use "Git";
+
+                                 when "x11" =>
+
+                                 when "quartz" =>
+
+                              end case;
+
+                           when "release" =>
+
+                        end case;
+
+                     when "disabled" =>
+
+                  end case;
+
+               when "relocatable" =>
+
+            end case;
+      end case;
+   end Ide;
 
 end OpenGL_Tutorial;
 
