@@ -10,10 +10,11 @@ package body Shapes is
    use Maths.Single_Math_Functions;
 
    function Init(Radius : GL.Types.Single;
-                 H_Sectors : Face_Count) return Sphere is
+                 H_Sectors : Face_Count;
+                 V_Edges : Edge_Count := 2) return Polyhedron is
 
-      Vertex_Count : Int := H_Sectors + 2;
-      Index_Count  : Int := H_Sectors * 6;
+      Vertex_Count : Int := H_Sectors * (V_Edges - 1) + 2;
+      Index_Count  : Int := H_Sectors * 6 * (V_Edges - 1);
       ------------------------------------------------------------------------
       function Gen_Vertices return Shape_Vertex_Array_Ptr is
          Shape_Vertices : Shape_Vertex_Array_Ptr := new Shape_Vertex_Array(1..Vertex_Count);
@@ -21,20 +22,29 @@ package body Shapes is
          H_Angle_Step : Radian := Radians(360.0 / Degree(H_Sectors));
          H_Angle_Start : Radian := -Pi / 2.0; -- берем относительно oX-oZ
 
-         I : Int := Shape_Vertices'First+1;
+         V_Angle_Start : Radian := 0.0;
+         V_Angle_Step : Radian := Radians(180.0 / Degree(V_Edges));
+         I : Int := Shape_Vertices'First + 1;
+         J : Int := 1;
       begin
 
-         -- выставим верхнюю и нижнюю вершины
-         Shape_Vertices(Shape_Vertices'First) := ( 0.0, Radius, 0.0, 1.0);
-         Shape_Vertices(Shape_Vertices'Last)  := ( 0.0, -Radius, 0.0, 1.0);
+         -- Выставим верхние и нижние значения
+         Shape_Vertices(Shape_Vertices'First) := (0.0,  Radius, 0.0, 1.0);
+         Shape_Vertices(Shape_Vertices'Last)  := (0.0, -Radius, 0.0, 1.0);
 
-         -- рассчитаем промежуточные значения
-         for K in 1..Int(Shape_Vertices'Length-2) loop
+         -- рассчитаем значения X,Y и Z, выставим W ( сверху вниз )
+         for K in 1..Shape_Vertices'Length - 2 loop
             Shape_Vertices(I)(X) := -Radius * Cos(Single(H_Angle_Start + Radian((K - 1)) * H_Angle_Step));
-            Shape_Vertices(I)(Y) := 0.0;
+            Shape_Vertices(I)(Y) := Radius * Cos(Single(V_Angle_Start + Radian(J) * V_Angle_Step));
             Shape_Vertices(I)(Z) := Radius * Sin(Single(H_Angle_Start + Radian((K - 1)) * H_Angle_Step));
             Shape_Vertices(I)(W) := 1.0;
             I := I+1;
+
+            -- сделаем шаг для вычисления значений Y
+            if K mod Integer(H_Sectors) = 0 then
+               J := J + 1;
+            end if;
+
          end loop;
 
          return Shape_Vertices;
@@ -61,26 +71,57 @@ package body Shapes is
          -- установим "верх"
          for K in 1..H_Sectors loop
             Shape_Indices(I) := UShort(K);
-            if (K + 1) = Vertex_Count - 1 then
+            if K = H_Sectors then
                Shape_Indices(I+1) := 1;
             else
                Shape_Indices(I+1) := UShort(K) + 1;
             end if;
             Shape_Indices(I+2) := 0;
-            I := I+3;
+            I := I + 3;
          end loop;
 
-         -- установим "низ"
-         I := Shape_Indices'Length - H_Sectors * 3 + 1;
-         for K in 1..H_Sectors loop
-            Shape_Indices(I) := UShort(K);
-            Shape_Indices(I+1) := UShort(Vertex_Count) - 1;
-            if (K + 1) = Vertex_Count - 1 then
-               Shape_Indices(I+2) := 1;
+         -- установим промежуточные значения
+         for K in 1..H_Sectors * (V_Edges - 2) loop
+
+            if K = 1 then
+               Shape_Indices(I) := UShort(K * H_Sectors) + 1;
             else
-               Shape_Indices(I+2) := UShort(K) + 1;
+               Shape_Indices(I) := Shape_Indices(I-6) + 1;
             end if;
-            I := I+3;
+
+            -- последняя грань текущей полосы?
+            if K mod H_Sectors = 0 then
+               Shape_Indices(I+1) := Shape_Indices(I) - UShort(H_Sectors - 1);
+               Shape_Indices(I+2) := Shape_Indices(I+1) - 1;
+            else
+               Shape_Indices(I+1) := Shape_Indices(I) + 1;
+               Shape_Indices(I+2) := Shape_Indices(I) - UShort(H_Sectors);
+            end if;
+
+            Shape_Indices(I+3) := Shape_Indices(I+2);
+            Shape_Indices(I+4) := Shape_Indices(I+1);
+            -- последняя грань текущей полосы?
+            if K mod H_Sectors = 0 then
+               Shape_Indices(I+5) := Shape_Indices(I+4) - UShort(H_Sectors);
+            else
+               Shape_Indices(I+5) := Shape_Indices(I+2) + 1;
+            end if;
+
+            I := I + 6;
+         end loop;
+
+
+         -- установим "низ"
+         for K in 1..H_Sectors loop
+            Shape_Indices(I) := UShort(K + H_Sectors * (V_Edges - 2));
+
+            Shape_Indices(I+1) := UShort(Vertex_Count) - 1;
+            if K = H_Sectors then
+               Shape_Indices(I+2) := Shape_Indices((I+2)-H_Sectors*3+1);
+            else
+               Shape_Indices(I+2) := Shape_Indices(I) + 1;
+            end if;
+            I := I + 3;
          end loop;
 
         return Shape_Indices;
@@ -89,7 +130,7 @@ package body Shapes is
 
       ------------------------------------------------------------------------
 
-      New_Sphere : Sphere := new Sphere_Type'(Ada.Finalization.Controlled with
+      New_Sphere : Polyhedron := new Polyhedron_Type'(Ada.Finalization.Controlled with
                                               Vertex_Count => Vertex_Count,
                                               Index_Count  => Index_Count,
                                               Vertices     => <>,
@@ -105,25 +146,25 @@ package body Shapes is
    end Init;
 
    function Get_Vertices
-     (Object : access Sphere_Type)
+     (Object : access Polyhedron_Type)
       return Shape_Vertex_Array
    is
    begin
       return Object.Vertices.all;
    end Get_Vertices;
 
-   function Get_Normals(Object : access Sphere_Type) return Shape_Normal_Array is
+   function Get_Normals(Object : access Polyhedron_Type) return Shape_Normal_Array is
    begin
       return Object.Normals.all;
    end Get_Normals;
 
-   function Get_Indices (Object : access Sphere_Type) return Shape_Indices_Array is
+   function Get_Indices (Object : access Polyhedron_Type) return Shape_Indices_Array is
    begin
       return Object.Indices.all;
    end Get_Indices;
 
    overriding
-   procedure Finalize (Object : in out Sphere_Type) is
+   procedure Finalize (Object : in out Polyhedron_Type) is
       procedure Free_Vertices is new Ada.Unchecked_Deallocation(Object => Shape_Vertex_Array,
                                                                 Name   => Shape_Vertex_Array_Ptr);
       procedure Free_Normals is new Ada.Unchecked_Deallocation(Object => Shape_Normal_Array,

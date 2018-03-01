@@ -55,13 +55,35 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
    ----------------------------------------------------------------------
 
    procedure Main_Loop (Main_Window : in out Glfw.Windows.Window) is
+      use GL.Types;
+      use Glfw;
       use type Glfw.Input.Button_State;
+
+      Is_Checking_Frame_Time           : Boolean := False;
+      Start_Time, End_Time, Check_Time : Uint;
+      Frames                           : UInt := 0;
 
       Running : Boolean := True;
    begin
       Setup(Main_Window);
       while Running loop
+
+         if not Is_Checking_Frame_Time then
+            Start_Time := Uint(Time);
+            Is_Checking_Frame_Time := True;
+         end if;
+
          Render;
+
+         End_Time := Uint(Time);
+         Check_Time := End_Time - Start_Time;
+         if (Check_Time < 1) then
+            Frames := Frames + 1;
+         else
+            Put("Frames per second : " & Frames'Img & ASCII.CR);
+            Frames := 0;
+            Is_Checking_Frame_Time := False;
+         end if;
 
          Glfw.Windows.Context.Swap_Buffers(Main_Window'Access);
          Glfw.Input.Poll_Events;
@@ -132,10 +154,10 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
             A := 5.0 * Single(K) / 4.0;
             B := 5.0 * Single(K) / 5.0;
             C := 5.0 * Single(K) / 6.0;
-            Model_Matrices(K) := Maths.Rotation_Matrix(Maths.Degree(A + Single(T) * 360.0), oX) *
-              Maths.Rotation_Matrix(Maths.Degree(B + Single(T) * 360.0), oY) *
+            Model_Matrices(K) := Maths.Rotation_Matrix(Maths.Degree(A + Single(T) * 720.0), oX) *
+              Maths.Rotation_Matrix(Maths.Degree(B + Single(T) * 360.0), oY);-- *
               --Maths.Rotation_Matrix(Maths.Degree(C + Single(T) * 360.0), oZ) *
-              Maths.Translation_Matrix((2.0 + A, 2.0 + B, -1.0 + C));
+              --Maths.Translation_Matrix((2.0 + A, 2.0 + B, -1.0 + C));
          end loop;
 
          GL.Objects.Buffers.Unmap(Array_Buffer);
@@ -184,10 +206,10 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
 
       A,B,C : Single;
 
-      aSphere      : Sphere := Shapes.Init(2.0, 50);
-      Vertices     : Shape_Vertex_Array := aSphere.Get_Vertices;
-      Normals      : Shape_Normal_Array := aSphere.Get_Normals;
-      Indices      : Shape_Indices_Array := aSphere.Get_Indices;
+      Sphere      : Polyhedron := Shapes.Init(3.0, 80, 60);
+      Vertices     : Shape_Vertex_Array := Sphere.Get_Vertices;
+      Normals      : Shape_Normal_Array := Sphere.Get_Normals;
+      Indices      : Shape_Indices_Array := Sphere.Get_Indices;
       Colors       : Singles.Vector4_Array(Vertices'Range) := (others => (others => 0.0));
       Color_Offset : Int := Utilities.Get_Size(Vertices);
       Normal_Offset : Int := Color_Offset + Utilities.Get_Size(Colors);
@@ -205,8 +227,8 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
          Aspect := Single( Width ) / Single ( Height );
       end;
 
-      GL.Toggles.Enable(GL.Toggles.Cull_Face);
-      --GL.Rasterization.Set_Polygon_Mode(GL.Rasterization.Line);
+      --GL.Toggles.Enable(GL.Toggles.Cull_Face);
+      GL.Rasterization.Set_Polygon_Mode(GL.Rasterization.Line);
 
       Render_Program := Program_From((Src("shaders\gl_4_stencil_test\vertex_shader.glsl", Vertex_Shader),
                                      Src("shaders\gl_4_stencil_test\fragment_shader.glsl", Fragment_Shader)));
