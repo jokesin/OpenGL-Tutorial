@@ -9,7 +9,7 @@ with GL_Tutorials.Ex_4_Stencil_Test;
 
 procedure GL_4_2 is
 Main_Window : Glfw.Windows.Window;
-   Program_Name : String := "OpenGL Tutorial - Vertex Colors";
+   Program_Name : String := "OpenGL Tutorial - Stencil Test";
    Window_Title : constant String := Program_Name;
 
 begin

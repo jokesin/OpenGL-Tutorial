@@ -1,5 +1,6 @@
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
+with Ada.Unchecked_Deallocation;
 
 with GL.Attributes;
 with GL.Objects.Buffers;
@@ -29,11 +30,15 @@ with Utilities;
 
 package body GL_Tutorials.Ex_4_Stencil_Test is
 
-   Vertex_Array_Object : GL.Objects.Vertex_Arrays.Vertex_Array_Object;
-   Vertex_Buffer       : GL.Objects.Buffers.Buffer;
-   Index_Buffer        : GL.Objects.Buffers.Buffer;
-   Matrix_Buffer       : GL.Objects.Buffers.Buffer;
-   Render_Program      : GL.Objects.Programs.Program;
+   type Object_Buffers is
+      record
+         Vertex_Array_Object : GL.Objects.Vertex_Arrays.Vertex_Array_Object;
+         Vertex_Buffer       : GL.Objects.Buffers.Buffer;
+         Index_Buffer        : GL.Objects.Buffers.Buffer;
+         Matrix_Buffer       : GL.Objects.Buffers.Buffer;
+      end record;
+
+   procedure Clear(Obj_Buffers : in out Object_Buffers);
 
    View_Matrix_Loc       : GL.Uniforms.Uniform;
    Projection_Matrix_Loc : GL.Uniforms.Uniform;
@@ -45,10 +50,15 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
 
    Aspect : GL.Types.Single;
 
-   Render_Index_Count : GL.Types.Int;
 
-   procedure Setup(Main_Window : in out Glfw.Windows.Window);
-   procedure Render;
+   procedure Setup(Main_Window    : in out Glfw.Windows.Window;
+                   Shape          : access Shapes.Polyhedron_Type'Class;
+                   Obj_Buffers    : in out Object_Buffers;
+                   Shader_Program : out GL.Objects.Programs.Program);
+
+   procedure Render(Shape          : access Shapes.Polyhedron_Type'Class;
+                    Obj_Buffers    : in out Object_Buffers;
+                    Shader_Program : GL.Objects.Programs.Program);
 
 
    ----------------------------------------------------------------------
@@ -64,16 +74,59 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
       Frames                           : UInt := 0;
 
       Running : Boolean := True;
+
+      Line_Mode_Selected : Boolean := False;
+
+      aSphere : Shapes.Sphere := Shapes.Init(3.0, 100, 100);
+      Cyl : Shapes.Cylinder := Shapes.Init(10.0, 4.0, 100, 100);
+
+      Sphere_Program,
+      Cyl_Program : GL.Objects.Programs.Program;
+      Sphere_Buffers,
+      Cyl_Buffers : Object_Buffers;
+      ------------------------------------------------------------------
+      procedure Mode_Lines_Only(Mode_On : Boolean) is
+      begin
+         if Mode_On then
+            GL.Rasterization.Set_Polygon_Mode(GL.Rasterization.Line);
+            GL.Toggles.Disable(GL.Toggles.Cull_Face);
+         else
+            GL.Rasterization.Set_Polygon_Mode(GL.Rasterization.Fill);
+            GL.Toggles.Enable(GL.Toggles.Cull_Face);
+         end if;
+      end Mode_Lines_Only;
+      ------------------------------------------------------------------
+
    begin
-      Setup(Main_Window);
+
+      Setup(Main_Window, aSphere, Sphere_Buffers, Sphere_Program);
+      Setup(Main_Window, Cyl,Cyl_Buffers, Cyl_Program);
+
+      Put_Line("Press key to change mode:" & ASCII.LF & ASCII.CR &
+                 "1 - Line mode" & ASCII.LF & ASCII.CR &
+                 "2 - Fill mode");
+
       while Running loop
+
+         if Glfw.Input.Pressed = Main_Window.Key_State(Glfw.Input.Keys.Key_1) then
+            if not Line_Mode_Selected then
+               Line_Mode_Selected := True;
+               Mode_Lines_Only(Line_Mode_Selected);
+            end if;
+         elsif Glfw.Input.Pressed = Main_Window.Key_State(Glfw.Input.Keys.Key_2) then
+            if Line_Mode_Selected then
+               Line_Mode_Selected := False;
+               Mode_Lines_Only(Line_Mode_Selected);
+            end if;
+         end if;
 
          if not Is_Checking_Frame_Time then
             Start_Time := Uint(Time);
             Is_Checking_Frame_Time := True;
          end if;
 
-         Render;
+         Render(Cyl, Cyl_Buffers, Cyl_Program);
+         Render(aSphere, Sphere_Buffers, Sphere_Program);
 
          End_Time := Uint(Time);
          Check_Time := End_Time - Start_Time;
@@ -92,9 +145,16 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
          Running := Running and not Main_Window.Should_Close;
       end loop;
 
-      Render_Program.Clear;
-      Vertex_Buffer.Clear;
-      Vertex_Array_Object.Clear;
+      if Sphere_Program.Initialized then
+         Sphere_Program.Clear;
+      end if;
+
+      if Cyl_Program.Initialized then
+         Cyl_Program.Clear;
+      end if;
+
+      Clear(Sphere_Buffers);
+      Clear(Cyl_Buffers);
    exception
       when others     =>
          Put_Line("An exception occured in Main_Loop");
@@ -104,7 +164,9 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
    ----------------------------------------------------------------------
    ----------------------------------------------------------------------
 
-   procedure Render is
+   procedure Render(Shape          : access Shapes.Polyhedron_Type'Class;
+                    Obj_Buffers    : in out Object_Buffers;
+                    Shader_Program : GL.Objects.Programs.Program) is
       use Glfw;
       use GL.Types;
       use GL.Objects;
@@ -145,7 +207,7 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
          function To_Array_Access is new Ada.Unchecked_Conversion(Singles.Matrix4_Pointers.Pointer,
                                                                   Model_Matrices_Access);
       begin
-         Array_Buffer.Bind(Matrix_Buffer);
+         Array_Buffer.Bind(Obj_Buffers.Matrix_Buffer);
          Utilities.Map(Array_Buffer, Write_Only, Model_Matrices_Pointer);
 
          Model_Matrices := To_Array_Access(Model_Matrices_Pointer);
@@ -172,17 +234,19 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
       Utilities.Clear_Background_Colour(Black);
 
       -- запускаем программу
-      Use_Program(Render_Program);
+      Use_Program(Shader_Program);
 
       -- установим матрицы модели и проекции
       GL.Uniforms.Set_Single(View_Matrix_Loc, View_Matrix);
       GL.Uniforms.Set_Single(Projection_Matrix_Loc, Proj_Matrix);
 
       -- подготовка к DrawElementsInstanced
-      Vertex_Array_Object.Bind;
-      Element_Array_Buffer.Bind(Index_Buffer);
+      Obj_Buffers.Vertex_Array_Object.Bind;
+      Element_Array_Buffer.Bind(Obj_Buffers.Index_Buffer);
 
-      GL.Objects.Buffers.Draw_Elements_Instanced(Triangles, Render_Index_Count, UShort_Type, 0, 1);
+      Shape.Draw_Elements_Instanced(1);
+
+      --GL.Objects.Buffers.Draw_Elements_Instanced(Triangles, Render_Index_Count, UShort_Type, 0, 1);
    exception
       when  others =>
          Put_Line ("An exceptiom occurred in Render.");
@@ -192,7 +256,10 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
    ----------------------------------------------------------------------
    ----------------------------------------------------------------------
 
-   procedure Setup(Main_Window : in out Glfw.Windows.Window) is
+   procedure Setup(Main_Window    : in out Glfw.Windows.Window;
+                   Shape          : access Shapes.Polyhedron_Type'Class;
+                   Obj_Buffers    : in out Object_Buffers;
+                   Shader_Program : out GL.Objects.Programs.Program) is
       use GL;
       use GL.Attributes;
       use GL.Types;
@@ -206,31 +273,27 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
 
       A,B,C : Single;
 
-      Sphere        : Polyhedron := Shapes.Init(3.0, 200, 200);
-      Vertices      : Shape_Vertex_Array := Sphere.Get_Vertices;
-      Normals       : Shape_Normal_Array := Sphere.Get_Normals;
-      Indices       : Shape_Indices_Array := Sphere.Get_Indices;
-      Colors        : Singles.Vector4_Array(Vertices'Range) := (others => (others => 0.0));
+      subtype Colors_Vector_Array is Singles.Vector4_Array;
+      type Colors_Vector_Array_Ref is access all Colors_Vector_Array;
+
+      procedure Free_Colors is new Ada.Unchecked_Deallocation(Object => Colors_Vector_Array,
+                                                              Name   => Colors_Vector_Array_Ref);
+
+      Vertices      : Shape_Vertex_Array := Shape.Get_Vertices;
+      Normals       : Shape_Normal_Array := Shape.Get_Normals;
+      Indices_Ptr   : Shape_Indices_Array_Ptr := Shape.Get_Indices;
+      Colors_Ptr    : Colors_Vector_Array_Ref := new Colors_Vector_Array(Vertices'Range);
       Color_Offset  : Int := Utilities.Get_Size(Vertices);
-      Normal_Offset : Int := Color_Offset + Utilities.Get_Size(Colors);
+      Normal_Offset : Int := Color_Offset + Utilities.Get_Size(Colors_Ptr.all);
       Block_Size    : Long := Long(Utilities.Get_Size(Vertices) +
-                                    Utilities.Get_Size(Colors) +
+                                    Utilities.Get_Size(Colors_Ptr.all) +
                                      Utilities.Get_Size(Normals));
 
-      procedure Mode_Lines_Only(Mode_On : Boolean) is
-      begin
-         if Mode_On then
-            GL.Rasterization.Set_Polygon_Mode(GL.Rasterization.Line);
-         else
-            GL.Toggles.Enable(GL.Toggles.Cull_Face);
-         end if;
-      end Mode_Lines_Only;
+
 
    begin
 
-      Mode_Lines_Only(False);
-
-      Render_Index_Count := Indices'Length;
+      GL.Toggles.Enable(GL.Toggles.Cull_Face);
 
       declare
          Width, Height : Glfw.Size;
@@ -241,43 +304,43 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
 
 
 
-      Render_Program := Program_From((Src("shaders\gl_4_stencil_test\vertex_shader.glsl", Vertex_Shader),
+      Shader_Program := Program_From((Src("shaders\gl_4_stencil_test\vertex_shader.glsl", Vertex_Shader),
                                      Src("shaders\gl_4_stencil_test\fragment_shader.glsl", Fragment_Shader)));
-      Use_Program(Render_Program);
-      View_Matrix_Loc := Uniform_Location(Render_Program, "view_matrix");
-      Projection_Matrix_Loc := Uniform_Location(Render_Program, "projection_matrix");
+      Use_Program(Shader_Program);
+      View_Matrix_Loc := Uniform_Location(Shader_Program, "view_matrix");
+      Projection_Matrix_Loc := Uniform_Location(Shader_Program, "projection_matrix");
 
-      Vertex_Array_Object.Initialize_Id;
-      Vertex_Array_Object.Bind;
+      Obj_Buffers.Vertex_Array_Object.Initialize_Id;
+      Obj_Buffers.Vertex_Array_Object.Bind;
 
 
-      Index_Buffer.Initialize_Id;
-      Element_Array_Buffer.Bind(Index_Buffer);
-      Utilities.Load_Element_Buffer(Element_Array_Buffer, Indices, Static_Draw);
+      Obj_Buffers.Index_Buffer.Initialize_Id;
+      Element_Array_Buffer.Bind(Obj_Buffers.Index_Buffer);
+      Utilities.Load_Element_Buffer(Element_Array_Buffer, Indices_Ptr.all, Static_Draw);
 
       -- получим позиции атрибутов
-      Position_Loc := Attrib_Location(Render_Program, "position");
-      Color_Loc := Attrib_Location(Render_Program, "color");
-      Normal_Loc := Attrib_Location(Render_Program, "normal");
-      Matrix_Loc := Attrib_Location(Render_Program, "model_matrix");
+      Position_Loc := Attrib_Location(Shader_Program, "position");
+      Color_Loc := Attrib_Location(Shader_Program, "color");
+      Normal_Loc := Attrib_Location(Shader_Program, "normal");
+      Matrix_Loc := Attrib_Location(Shader_Program, "model_matrix");
 
       -- сгенерируем цвета
-      for K in Colors'Range loop
+      for K in Colors_Ptr.all'Range loop
          A := Single(K) / 4.0;
          B := Single(K) / 5.0;
          C := Single(K) / 6.0;
 
-         Colors(K)(X) := 0.5 * (Sin(A + 1.0) + 1.0);
-         Colors(K)(Y) := 0.5 * (Sin(B + 2.0) + 1.0);
-         Colors(K)(Z) := 0.5 * (Sin(C + 3.0) + 1.0);
-         Colors(K)(W) := 1.0;
+         Colors_Ptr(K)(X) := 0.5 * (Sin(A + 1.0) + 1.0);
+         Colors_Ptr(K)(Y) := 0.5 * (Sin(B + 2.0) + 1.0);
+         Colors_Ptr(K)(Z) := 0.5 * (Sin(C + 3.0) + 1.0);
+         Colors_Ptr(K)(W) := 1.0;
       end loop;
 
-      Vertex_Buffer.Initialize_Id;
-      Array_Buffer.Bind(Vertex_Buffer);
+      Obj_Buffers.Vertex_Buffer.Initialize_Id;
+      Array_Buffer.Bind(Obj_Buffers.Vertex_Buffer);
       Allocate(Array_Buffer,Block_Size,Static_Draw);
       Utilities.Set_Buffer_Sub_Data(Array_Buffer, 0, Vertices);
-      Utilities.Set_Buffer_Sub_Data(Array_Buffer, Color_Offset, Colors);
+      Utilities.Set_Buffer_Sub_Data(Array_Buffer, Color_Offset, Colors_Ptr.all);
       Utilities.Set_Buffer_Sub_Data(Array_Buffer, Normal_Offset, Normals);
 
       GL.Attributes.Set_Vertex_Attrib_Pointer2(Position_Loc, 4, Single_Type, 0, 0);
@@ -290,8 +353,8 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
 
 
       -- настроим получение матрицы
-      Matrix_Buffer.Initialize_Id;
-      Array_Buffer.Bind(Matrix_Buffer);
+      Obj_Buffers.Matrix_Buffer.Initialize_Id;
+      Array_Buffer.Bind(Obj_Buffers.Matrix_Buffer);
       Allocate(Array_Buffer, Singles.Matrix4'Size / System.Storage_Unit, Dynamic_Draw);
 
       -- пройдемся по каждой колонке матрицы для установки Vertex_Attrib_Divisor
@@ -304,8 +367,20 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
          GL.Attributes.Enable_Vertex_Attrib_Array(Matrix_Loc + K);
          GL.Attributes.Vertex_Attrib_Divisor(Matrix_Loc + K, 1);
       end loop;
+
+      -- освобождаем ресурсы, которые нам больше не нужны
+      Free_Colors(Colors_Ptr);
    exception
       when others => Put_Line("An exception occured in Setup.");
          raise;
    end Setup;
+
+   procedure Clear(Obj_Buffers : in out Object_Buffers) is
+   begin
+      Obj_Buffers.Vertex_Buffer.Clear;
+      Obj_Buffers.Index_Buffer.Clear;
+      Obj_Buffers.Matrix_Buffer.Clear;
+      Obj_Buffers.Vertex_Array_Object.Clear;
+   end Clear;
+
 end GL_Tutorials.Ex_4_Stencil_Test;

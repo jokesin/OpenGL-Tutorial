@@ -16,6 +16,9 @@ package Utilities is
      GL.Objects.Buffers.Load_To_Buffer(GL.Types.UShorts.Vector3_Pointers);
    
    procedure Load_Element_Buffer is new
+     GL.Objects.Buffers.Load_To_Buffer(GL.Types.UInt_Pointers);
+   
+   procedure Load_Element_Buffer is new
      GL.Objects.Buffers.Load_To_Buffer(GL.Types.UShort_Pointers);
    
    procedure Load_To_Buffer is new
