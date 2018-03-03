@@ -3,7 +3,7 @@ with GL.Types;
 package Shapes is
 
    type Polyhedron_Type(Vertex_Count : GL.Types.Int;
-                    Index_Count : GL.Types.Int)
+                        Index_Count : GL.Types.Int)
    is new Ada.Finalization.Controlled with private;
    
    type Polyhedron is access all Polyhedron_Type;
