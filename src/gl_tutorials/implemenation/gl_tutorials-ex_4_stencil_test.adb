@@ -97,8 +97,8 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
       Line_Mode_Selected : Boolean := False;
       Render_Program : GL.Objects.Programs.Program;
 
-      aSphere           : Shapes.Sphere := Shapes.Init(3.0, 100, 100);
-      Cyl               : Shapes.Cylinder := Shapes.Init(10.0, 4.0, 100, 100);
+      aSphere           : Shapes.Sphere := Shapes.Init(5.0, 100, 100);
+      Cyl               : Shapes.Cylinder := Shapes.Init(9.5, 4.0, 100, 100);
 
       Sphere_Obj : Object := Object'(Shape   => aSphere,
                                      Buffers => <>);
@@ -184,8 +184,7 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
       oY    : Singles.Vector3 := (0.0, 1.0, 0.0);
       oZ    : Singles.Vector3 := (0.0, 0.0, 1.0);
 
-      View_Matrix  : Singles.Matrix4 :=
-        Maths.Translation_Matrix((0.0, 0.0, -10.0));
+      View_Matrix  : Singles.Matrix4 := Maths.Translation_Matrix((0.0, 0.0, -10.0));
       Proj_Matrix  : Singles.Matrix4 := Maths.Perspective_Matrix(Top    => 1.0,
                                                                  Bottom => -1.0,
                                                                  Left   => -Aspect,
@@ -232,26 +231,76 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
 
    begin
 
+      -- очистим все буферы
       GL.Buffers.Clear(Bits => GL.Buffers.Buffer_Bits'(Depth   => True,
                                                        Accum   => False,
-                                                       Stencil => False,
+                                                       Stencil => True,
                                                        Color   => True));
+      -- разрешаем тест трафарета
+      GL.Toggles.Enable(GL.Toggles.Stencil_Test);
 
-      for K in Objects'Range loop
-         Set_Model_Matrix_Mapped_Direct(Objects(K).Buffers);
+      -- рисуем цилиндр и заполняем буфер трафарета единицами
+      -- в том месте, где рисуется куб
+      GL.Buffers.Set_Stencil_Function(Func => Always,
+                                      Ref  => 1,
+                                      Mask => 0);
+      GL.Buffers.Set_Stencil_Operation(Stencil_Fail => GL.Buffers.Keep,
+                                       Depth_Fail   => GL.Buffers.Keep,
+                                       Depth_Pass   => GL.Buffers.Replace);
+      Set_Model_Matrix_Mapped_Direct(Objects(0).Buffers);
+      -- установим матрицы модели и проекции
+      GL.Uniforms.Set_Single(View_Matrix_Loc, View_Matrix);
+      GL.Uniforms.Set_Single(Projection_Matrix_Loc, Proj_Matrix);
 
-         -- установим матрицы модели и проекции
-         GL.Uniforms.Set_Single(View_Matrix_Loc, View_Matrix);
-         GL.Uniforms.Set_Single(Projection_Matrix_Loc, Proj_Matrix);
+      -- подготовка к DrawElementsInstanced
+      Objects(0).Buffers.Vertex_Array_Object.Bind;
+      Element_Array_Buffer.Bind(Objects(0).Buffers.Index_Buffer);
+      Objects(0).Shape.Draw_Elements_Instanced(1);
 
-         -- подготовка к DrawElementsInstanced
-         Objects(K).Buffers.Vertex_Array_Object.Bind;
 
-         Element_Array_Buffer.Bind(Objects(K).Buffers.Index_Buffer);
+      -- заполняем буфер трафарета двойками в том месте,
+      -- где сфера закрываем куб
+      GL.Buffers.Set_Stencil_Function(Func => Always,
+                                      Ref  => 2,
+                                      Mask => 0);
+      GL.Buffers.Set_Stencil_Operation(Stencil_Fail => GL.Buffers.Keep,
+                                       Depth_Fail   => GL.Buffers.Keep,
+                                       Depth_Pass   => GL.Buffers.Replace);
+      Set_Model_Matrix_Mapped_Direct(Objects(1).Buffers);
+      -- установим матрицы модели и проекции
+      GL.Uniforms.Set_Single(View_Matrix_Loc, View_Matrix);
+      GL.Uniforms.Set_Single(Projection_Matrix_Loc, Proj_Matrix);
 
-         Objects(K).Shape.Draw_Elements_Instanced(1);
+      -- подготовка к DrawElementsInstanced
+      Objects(1).Buffers.Vertex_Array_Object.Bind;
+      Element_Array_Buffer.Bind(Objects(1).Buffers.Index_Buffer);
+      Objects(1).Shape.Draw_Elements_Instanced(1);
 
-      end loop;
+
+      -- очищаем буферы цвета и глубины
+      GL.Buffers.Clear(GL.Buffers.Buffer_Bits'(Depth   => True,
+                                               Accum   => False,
+                                               Stencil => False,
+                                               Color   => True));
+
+
+      -- отрисовываем тот же самый цилиндр без сферы.
+      -- устанавливаем, что тест трафарета проходит,
+      -- если значение, находящееся в буфере трафарета
+      -- совпадает со значением ref.
+      -- цилиндр у нас имел значение единицы.
+      GL.Buffers.Set_Stencil_Function(Func => Equal,
+                                      Ref  => 1,
+                                      Mask => 255);
+      --Set_Model_Matrix_Mapped_Direct(Objects(0).Buffers);
+      -- установим матрицы модели и проекции
+      GL.Uniforms.Set_Single(View_Matrix_Loc, View_Matrix);
+      GL.Uniforms.Set_Single(Projection_Matrix_Loc, Proj_Matrix);
+
+      -- подготовка к DrawElementsInstanced
+      Objects(0).Buffers.Vertex_Array_Object.Bind;
+      Element_Array_Buffer.Bind(Objects(0).Buffers.Index_Buffer);
+      Objects(0).Shape.Draw_Elements_Instanced(1);
 
       GL.Objects.Vertex_Arrays.Bind(GL.Objects.Vertex_Arrays.Null_Array_Object);
    exception
@@ -278,7 +327,7 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
 
       A,B,C : Single;
 
-      Back_Color : Colors.Color := (0.5,0.0,0.5,1.0);
+      Back_Color : Colors.Color := (0.0,0.0,0.0,1.0);
 
       subtype Colors_Vector_Array is Singles.Vector4_Array;
       type Colors_Vector_Array_Ref is access all Colors_Vector_Array;

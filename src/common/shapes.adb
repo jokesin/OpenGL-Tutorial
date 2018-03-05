@@ -327,7 +327,6 @@ package body Shapes is
                                      Prim_Count : GL.Types.Size) is
    begin
       GL.Objects.Buffers.Draw_Elements_Instanced(Triangles, Object.Index_Count, UInt_Type, 0, 1);
-      --GL.Objects.Buffers.Draw_Elements_Instanced(Triangles, 9, UInt_Type, Integer(Object.Index_Count-9), 1);
    end Draw_Elements_Instanced;
 
    overriding
