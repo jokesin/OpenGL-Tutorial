@@ -1,8 +1,10 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Text_IO;           use Ada.Text_IO;
 
 with GL.Buffers;
 with GL.Context;
+
+with System;
 
 package body Utilities is
 
@@ -27,5 +29,11 @@ package body Utilities is
       Put_Line("Primary_Shading_Language_Version : " & Shading_Language_Version);
    end Show_GL_Data;
 
+   function Get_Bytes_Count (Data : Pointers.Element_Array) return GL.Types.Int
+   is
+      use GL.Types;
+   begin
+      return Pointers.Element'Size * Data'Length / System.Storage_Unit;
+   end Get_Bytes_Count;
 
 end Utilities;

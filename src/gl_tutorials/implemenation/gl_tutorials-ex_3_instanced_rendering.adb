@@ -117,11 +117,11 @@ package body GL_Tutorials.Ex_3_Instanced_Rendering is
       use GL.Objects.Programs;
       use GL.Objects.Shaders;
       use GL.Toggles;
-
       use Program_Loader;
-
       use type Interfaces.C.int;
 
+      function Get_Size is new Utilities.Get_Bytes_Count(GL.Types.Singles.Vector3_Pointers);
+      function Get_Size is new Utilities.Get_Bytes_Count(GL.Types.Singles.Vector4_Pointers);
 
    begin
 
@@ -146,9 +146,8 @@ package body GL_Tutorials.Ex_3_Instanced_Rendering is
          use GL.Attributes;
          use Maths.Single_Math_Functions;
 
-         Block_Size     : Int := Utilities.Get_Size(Vertex_Data.Cube_Positions) +
-           Utilities.Get_Size(Vertex_Data.Cube_Normals);
-         Normals_Offset : Int := Utilities.Get_Size(Vertex_Data.Cube_Positions);
+         Block_Size     : Int := Get_Size(Vertex_Data.Cube_Positions) + Get_Size(Vertex_Data.Cube_Normals);
+         Normals_Offset : Int := Get_Size(Vertex_Data.Cube_Positions);
 
          Cube_Colors    : Singles.Vector4_Array(1..INSTANCE_COUNT);
          A,B,C          : Single;

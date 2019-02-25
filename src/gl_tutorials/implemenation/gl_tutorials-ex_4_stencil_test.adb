@@ -335,6 +335,8 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
       procedure Free_Colors is new Ada.Unchecked_Deallocation(Object => Colors_Vector_Array,
                                                               Name   => Colors_Vector_Array_Ref);
 
+      function Get_Size is new Utilities.Get_Bytes_Count(GL.Types.Singles.Vector3_Pointers);
+      function Get_Size is new Utilities.Get_Bytes_Count(GL.Types.Singles.Vector4_Pointers);
 
    begin
 
@@ -365,11 +367,11 @@ package body GL_Tutorials.Ex_4_Stencil_Test is
             Normals       : Shape_Normal_Array:= Objects(K).Shape.Get_Normals;
             Indices_Ptr   : Shape_Indices_Array_Ptr:= Objects(K).Shape.Get_Indices;
             Colors_Ptr    : Colors_Vector_Array_Ref:= new Colors_Vector_Array(Vertices'Range);
-            Color_Offset  : Int:= Utilities.Get_Size(Vertices);
-            Normal_Offset : Int:= Color_Offset + Utilities.Get_Size(Colors_Ptr.all);
-            Block_Size    : Long:= Long(Utilities.Get_Size(Vertices) +
-                                          Utilities.Get_Size(Colors_Ptr.all) +
-                                          Utilities.Get_Size(Normals));
+            Color_Offset  : Int:= Get_Size(Vertices);
+            Normal_Offset : Int:= Color_Offset + Get_Size(Colors_Ptr.all);
+            Block_Size    : Long:= Long(Get_Size(Vertices) +
+                                          Get_Size(Colors_Ptr.all) +
+                                          Get_Size(Normals));
          begin
 
             Objects(K).Buffers.Vertex_Array_Object.Initialize_Id;

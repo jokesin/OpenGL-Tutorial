@@ -54,9 +54,10 @@ package body GL_Tutorials.Ex_2_Draw_Commands is
          use GL.Objects.Programs;
          use GL.Objects.Shaders;
          use Program_Loader;
-
          use type Interfaces.C.int;
 
+         function Get_Size is new Utilities.Get_Bytes_Count(GL.Types.Singles.Vector3_Pointers);
+         function Get_Size is new Utilities.Get_Bytes_Count(GL.Types.Singles.Vector4_Pointers);
 
       begin
 
@@ -76,9 +77,8 @@ package body GL_Tutorials.Ex_2_Draw_Commands is
 
 
          declare
-            Block_Size    : Int :=Utilities.Get_Size(Vertex_Data.Vertex_Positions) +
-              Utilities.Get_Size(Vertex_Data.Vertex_Colors);
-            Colour_Offset : Int := Utilities.Get_Size(Vertex_Data.Vertex_Positions);
+            Block_Size    : Int := Get_Size(Vertex_Data.Vertex_Positions) + Get_Size(Vertex_Data.Vertex_Colors);
+            Colour_Offset : Int := Get_Size(Vertex_Data.Vertex_Positions);
          begin
 
             -- выделим имя для буфера вершин
@@ -99,7 +99,7 @@ package body GL_Tutorials.Ex_2_Draw_Commands is
             Utilities.Set_Buffer_Sub_Data(Array_Buffer, Colour_Offset, Vertex_Data.Vertex_Colors);
 
 
-            GL.Attributes.Set_Vertex_Attrib_Pointer2(vPosition, 4, Single_Type, 0, 0);
+            GL.Attributes.Set_Vertex_Attrib_Pointer(vPosition, 4, Single_Type, 0, 0);
             GL.Attributes.Set_Vertex_Attrib_Pointer2(vColour, 4, Single_Type, 0, Colour_Offset);
 
             GL.Attributes.Enable_Vertex_Attrib_Array(vPosition);

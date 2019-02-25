@@ -8,9 +8,9 @@ with Initialize;
 with GL_Tutorials.Ex_1_Simple_Draw;
 
 procedure GL_1 is
-Main_Window : Glfw.Windows.Window;
-   Program_Name : String := "OpenGL Tutorial - Simple Draw";
-   Window_Title : constant String := Program_Name;
+Main_Window  : Glfw.Windows.Window;
+Program_Name : String := "OpenGL Tutorial - Simple Draw";
+Window_Title : constant String := Program_Name;
 
 begin
    Glfw.Init;
@@ -27,5 +27,5 @@ exception
    when Ex : others =>
       Put("An exception occured in " & Program_Name & " : ");
       Put_Line(Exception_Information(Ex));
-   
+      
 end GL_1;

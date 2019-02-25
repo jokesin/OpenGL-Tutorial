@@ -3,6 +3,8 @@ limited with "../OpenGLAda/opengl-glfw.gpr";
 
 project OpenGL_Tutorial is
 
+   type Library_Kinds1 is
+      ("static", "relocatable");
    for Object_Dir use "obj";
    type Glfw_Version_Type is
       ("2", "3");
@@ -27,12 +29,62 @@ project OpenGL_Tutorial is
    type Windowing_System_Type is
       ("windows", "x11", "quartz");
    Windowing_System : Windowing_System_Type := external ("Windowing_System");
+   LIBRARY_TYPE : Library_Kinds1 := external ("LIBRARY_TYPE");
 
    case Glfw_Version is
 
       when "2" =>
-         for Main use ("gl_1.adb");
-         for Source_Dirs use ("src");
+
+         case LIBRARY_TYPE is
+
+            when "static" =>
+
+               case Auto_Exceptions is
+
+                  when "enabled" =>
+
+                     case Mode is
+
+                        when "debug" =>
+
+                           case Windowing_System is
+
+                              when "windows" =>
+
+                                 case Library_Type is
+
+                                    when "static" =>
+                                       for Main use ("gl_1.adb");
+                                       for Source_Dirs use ("src/**");
+
+                                    when "relocatable" =>
+                                       for Main use ("gl_1.adb");
+                                       for Source_Dirs use ("src");
+                                 end case;
+
+                              when "x11" =>
+                                 for Main use ("gl_1.adb");
+                                 for Source_Dirs use ("src");
+
+                              when "quartz" =>
+                                 for Main use ("gl_1.adb");
+                                 for Source_Dirs use ("src");
+                           end case;
+
+                        when "release" =>
+                           for Main use ("gl_1.adb");
+                           for Source_Dirs use ("src");
+                     end case;
+
+                  when "disabled" =>
+                     for Main use ("gl_1.adb");
+                     for Source_Dirs use ("src");
+               end case;
+
+            when "relocatable" =>
+               for Main use ("gl_1.adb");
+               for Source_Dirs use ("src");
+         end case;
 
       when "3" =>
 

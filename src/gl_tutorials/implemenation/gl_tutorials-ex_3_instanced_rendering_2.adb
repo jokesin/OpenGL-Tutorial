@@ -126,11 +126,11 @@ package body GL_Tutorials.Ex_3_Instanced_Rendering_2 is
       use GL.Objects.Programs;
       use GL.Objects.Shaders;
       use GL.Toggles;
-
       use Program_Loader;
-
       use type Interfaces.C.int;
 
+      function Get_Size is new Utilities.Get_Bytes_Count(GL.Types.Singles.Vector3_Pointers);
+      function Get_Size is new Utilities.Get_Bytes_Count(GL.Types.Singles.Vector4_Pointers);
 
    begin
 
@@ -163,9 +163,8 @@ package body GL_Tutorials.Ex_3_Instanced_Rendering_2 is
 
          use Maths.Single_Math_Functions;
 
-         Block_Size     : Int := Utilities.Get_Size(Vertex_Data.Cube_Positions) +
-           Utilities.Get_Size(Vertex_Data.Cube_Normals);
-         Normals_Offset : Int := Utilities.Get_Size(Vertex_Data.Cube_Positions);
+         Block_Size     : Int := Get_Size(Vertex_Data.Cube_Positions) + Get_Size(Vertex_Data.Cube_Normals);
+         Normals_Offset : Int := Get_Size(Vertex_Data.Cube_Positions);
 
          Cube_Colors    : Singles.Vector4_Array(1..INSTANCE_COUNT);
          A,B,C          : Single;
@@ -226,7 +225,7 @@ package body GL_Tutorials.Ex_3_Instanced_Rendering_2 is
          --TODO check type
          Texture_Buffer.Bind(Color_Buffer);
          Utilities.Load_Vertex_Buffer_4(Texture_Buffer,Cube_Colors,Static_Draw);
-         Texture_Buffer.Tex_Buffer(GL.Pixels.RGBA32F, Color_Buffer);
+         Texture_Buffer.Allocate(GL.Pixels.RGBA32F, Color_Buffer);
 
          -- также поступим с TBO матриц модели.
          Model_Matrix_TBO.Initialize_Id;
@@ -238,7 +237,7 @@ package body GL_Tutorials.Ex_3_Instanced_Rendering_2 is
          GL.Objects.Buffers.Allocate(Texture_Buffer,
                                      INSTANCE_COUNT * Singles.Matrix4'Size / System.Storage_Unit,
                                      Dynamic_Draw);
-         Texture_Buffer.Tex_Buffer(GL.Pixels.RGBA32F, Model_Matrix_Buffer);
+         Texture_Buffer.Allocate(GL.Pixels.RGBA32F, Model_Matrix_Buffer);
 
          GL.Objects.Textures.Set_Active_Unit(0);
          --System.Machine_Code.Asm("int $3");

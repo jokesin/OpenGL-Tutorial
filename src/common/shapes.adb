@@ -326,7 +326,7 @@ package body Shapes is
    procedure Draw_Elements_Instanced(Object : access Polyhedron_Type;
                                      Prim_Count : GL.Types.Size) is
    begin
-      GL.Objects.Buffers.Draw_Elements_Instanced(Triangles, Object.Index_Count, UInt_Type, 0, 1);
+      GL.Objects.Buffers.Draw_Elements_Instanced(Triangles, UInt(Object.Index_Count), UInt_Type, 0, 1);
    end Draw_Elements_Instanced;
 
    overriding
