@@ -77,11 +77,14 @@ package body GL_Tutorials.Ex_4_Vertex_Colors is
 
          Use_Program(Render_Program);
 
-         GL.Attributes.Set_Vertex_Attrib_Pointer2(vColor, 4, UByte_Type, True,
-                                                 Vertex_Data.Vertex_Type'Size / System.Storage_Unit,
-                                                 0);
+         GL.Attributes.Set_Vertex_Attrib_Pointer2(vColor,
+                                                  4,
+                                                  UByte_Type,
+                                                  True,
+                                                  Vertex_Data.Vertex_Type'Size / System.Storage_Unit,
+                                                  0);
          GL.Attributes.Set_Vertex_Attrib_Pointer2(vPosition, 2, Single_Type,
-                                                 Vertex_Data.Vertex_Type'Size / System.Storage_Unit,
+                                                  Vertex_Data.Vertex_Type'Size / System.Storage_Unit,
                                                   Vertex_Data.Vertices(0).Color'Size / System.Storage_Unit);
 
          GL.Attributes.Enable_Vertex_Attrib_Array(vPosition);

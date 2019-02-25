@@ -8,7 +8,7 @@ with Initialize;
 with GL_Tutorials.Ex_3_Instanced_Rendering_2;
 
 procedure GL_3_3 is
-Main_Window : Glfw.Windows.Window;
+   Main_Window : Glfw.Windows.Window;
    Program_Name : String := "OpenGL Tutorial - Instanced Rendering 2";
    Window_Title : constant String := Program_Name;
 

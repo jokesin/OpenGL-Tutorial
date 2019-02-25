@@ -23,6 +23,8 @@ with Interfaces.C;
 
 with GL;
 
+with System; use System;
+
 package body GL_Tutorials.Ex_2_Draw_Commands is
 
    ---------------
@@ -74,8 +76,6 @@ package body GL_Tutorials.Ex_2_Draw_Commands is
          Render_Model_Matrix_Loc := Uniform_Location(Render_Program, "model_matrix");
          Render_Projection_Matrix_Loc := Uniform_Location(Render_Program, "projection_matrix");
 
-
-
          declare
             Block_Size    : Int := Get_Size(Vertex_Data.Vertex_Positions) + Get_Size(Vertex_Data.Vertex_Colors);
             Colour_Offset : Int := Get_Size(Vertex_Data.Vertex_Positions);
@@ -99,7 +99,7 @@ package body GL_Tutorials.Ex_2_Draw_Commands is
             Utilities.Set_Buffer_Sub_Data(Array_Buffer, Colour_Offset, Vertex_Data.Vertex_Colors);
 
 
-            GL.Attributes.Set_Vertex_Attrib_Pointer(vPosition, 4, Single_Type, 0, 0);
+            GL.Attributes.Set_Vertex_Attrib_Pointer2(vPosition, 4, Single_Type, 0, 0);
             GL.Attributes.Set_Vertex_Attrib_Pointer2(vColour, 4, Single_Type, 0, Colour_Offset);
 
             GL.Attributes.Enable_Vertex_Attrib_Array(vPosition);

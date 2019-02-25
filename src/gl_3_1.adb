@@ -8,7 +8,7 @@ with Initialize;
 with GL_Tutorials.Ex_3_Restarting_Primitives;
 
 procedure GL_3_1 is
-Main_Window : Glfw.Windows.Window;
+   Main_Window : Glfw.Windows.Window;
    Program_Name : String := "OpenGL Tutorial - Restarting Primitives";
    Window_Title : constant String := Program_Name;
 

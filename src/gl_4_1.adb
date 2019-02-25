@@ -8,7 +8,7 @@ with Initialize;
 with GL_Tutorials.Ex_4_Vertex_Colors;
 
 procedure GL_4_1 is
-Main_Window : Glfw.Windows.Window;
+   Main_Window : Glfw.Windows.Window;
    Program_Name : String := "OpenGL Tutorial - Vertex Colors";
    Window_Title : constant String := Program_Name;
 

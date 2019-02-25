@@ -8,7 +8,7 @@ with Initialize;
 with GL_Tutorials.Ex_2_Draw_Commands;
 
 procedure GL_2 is
-Main_Window : Glfw.Windows.Window;
+   Main_Window : Glfw.Windows.Window;
    Program_Name : String := "OpenGL Tutorial - Draw Commands";
    Window_Title : constant String := Program_Name;
 

@@ -213,9 +213,9 @@ package body GL_Tutorials.Ex_3_Instanced_Rendering is
          -- пройдемся по каждой колонке матрицы для установки Vertex_Attrib_Divisor
          for K in 0..Attribute(3) loop
             GL.Attributes.Set_Vertex_Attrib_Pointer2(Matrix_Loc + K, 4,
-                                                     Single_Type,
-                                                     Singles.Matrix4'Size / System.Storage_Unit,
-                                                     Int(K) * Singles.Vector4'Size / System.Storage_Unit);
+                                                    Single_Type,
+                                                    Singles.Matrix4'Size / System.Storage_Unit,
+                                                    Int(K) * Singles.Vector4'Size / System.Storage_Unit);
             GL.Attributes.Enable_Vertex_Attrib_Array(Matrix_Loc + K);
             GL.Attributes.Vertex_Attrib_Divisor(Matrix_Loc + K, 1);
          end loop;

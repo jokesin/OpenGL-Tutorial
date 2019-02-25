@@ -26,5 +26,5 @@ gpsauto.cgpr
 *.txt
 *.ini
 
-.bin/*
-.obj/*
+bin
+obj

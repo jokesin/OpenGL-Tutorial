@@ -47,8 +47,5 @@ package Utilities is
    generic
       with package Pointers is new Interfaces.C.Pointers (<>);
    function Get_Bytes_Count (Data : Pointers.Element_Array) return GL.Types.Int;
-   
-   --function Get_Size is new Get_Bytes_Count(GL.Types.Singles.Vector3_Pointers);
-   --function Get_Size is new Get_Bytes_Count(GL.Types.Singles.Vector4_Pointers);
-   
+      
 end Utilities;
